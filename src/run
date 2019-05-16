@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import os
+import subprocess
+
+VIEWS_MEASURE = os.environ['VIEWS_MEASURE']
+DOWNLOADS_MEASURE = os.environ['DOWNLOADS_MEASURE']
+OUTDIR = os.environ['OUTDIR']
+CACHEDIR = os.environ['CACHEDIR']
+
+
+def outstream(filename):
+    return open(filename, "w")
+
+
+def instream(filename):
+    return open(filename, "r")
+
+
+def get_output_filename(odir):
+    return "%s/JSTOR.csv" % (odir)
+
+
+def run():
+    out_file = get_output_filename(OUTDIR)
+    output_stream = outstream(out_file)
+    i = 0
+    for cache_file in os.listdir(CACHEDIR):
+        input_stream = instream(os.path.join(CACHEDIR, cache_file))
+        headers = ['--add-headers'] if i == 0 else []  # only 1st iteration
+        i += 1
+        cmd = ['./resolve_reports',
+               '--views-measure', VIEWS_MEASURE,
+               '--downloads-measure', DOWNLOADS_MEASURE] + headers
+        subprocess.call(cmd, stdout=output_stream, stdin=input_stream)
+
+
+if __name__ == '__main__':
+    run()
